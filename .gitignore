@@ -8,3 +8,4 @@
 /spec/reports/
 /tmp/
 /lib/sandbox.rb
+/lib/sqlite_test.db
