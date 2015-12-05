@@ -11,8 +11,16 @@ module Agave
       }
 
       def self.option(key, val)
-        @config[key] = val
-      end
+        begin
+           @config.each do |k,v|
+             unless Error::InvalidDriverKey.check_otpion? key, @config
+                @config[key] = val
+             end
+           end
+        rescue Agave::Error::Standard => exception
+           puts exception.message key, @config
+        end
+      end # METHOD: option
 
      def self.config
        @config
@@ -23,19 +31,21 @@ module Agave
 
 
    class SQLite
-
      include Adapter
 
       class << self
 
          def connect(db)
-            Agave::Adapter.option(:driver, 'sqlite')
+            Agave::Adapter.option(:drver, 'sqlite')
             Agave::Adapter.option(:database, db)
-            conn = Agave::Connection.new(Agave::Adapter::config)
+            conn = Agave::Connection.new(Agave::Adapter.config)
          end
 
-      end
-   end
+      end # CLASS : self
+
+   end # CLASS : SQLite
+
+
 
    class MySQL
    end
