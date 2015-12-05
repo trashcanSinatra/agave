@@ -17,8 +17,8 @@ module Agave
                 @config[key] = val
              end
            end
-        rescue Agave::Error::Standard => exception
-           puts exception.message key, @config
+        rescue Agave::Error::Standard => e
+           puts e.message key, @config
         end
       end # METHOD: option
 
@@ -36,9 +36,9 @@ module Agave
       class << self
 
          def connect(db)
-            Agave::Adapter.option(:drver, 'sqlite')
-            Agave::Adapter.option(:database, db)
-            conn = Agave::Connection.new(Agave::Adapter.config)
+            Agave::Adapter.option :drver, 'sqlite'
+            Agave::Adapter.option :database, db
+            conn = Agave::Connection.new Agave::Adapter.config
          end
 
       end # CLASS : self

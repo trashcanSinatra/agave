@@ -19,8 +19,8 @@ module Agave
          end
 
          def self.check_otpion?(key, config)
-             return false if config.key?(key)
-             raise Error::InvalidDriverKey unless config.key?(key)
+             return false if config.key? key
+             raise Error::InvalidDriverKey unless config.key? key
              exit
          end
       end
