@@ -17,12 +17,6 @@ module Agave
             config.each {|k,v| error << "\t\t #{k} \n" }
             error << "\n"
          end
-
-         def self.check?(key, config)
-             return false if config.key? key
-             raise Error::DriverKey unless config.key? key
-             exit
-         end
       end
 
    end
