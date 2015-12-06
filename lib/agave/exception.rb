@@ -8,7 +8,7 @@ module Agave
         end
       end
 
-      class InvalidDriverKey < Standard
+      class DriverKey < Standard
          def message (key, config)
             error = Standard::header
             error << "\"#{key}\" is not in the driver config."
@@ -18,9 +18,9 @@ module Agave
             error << "\n"
          end
 
-         def self.check_otpion?(key, config)
+         def self.check?(key, config)
              return false if config.key? key
-             raise Error::InvalidDriverKey unless config.key? key
+             raise Error::DriverKey unless config.key? key
              exit
          end
       end
