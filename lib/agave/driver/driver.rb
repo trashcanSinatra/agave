@@ -15,9 +15,9 @@ module Agave
 
       def self.set(key, val)
          begin
-           @config[key] = val << "_" if key == :prefix
+            @config[key] = val << "_" if key == :prefix
             @config.each do |k,v|
-               unless Error::DriverKey.check? key, @config
+               unless Adapter::Exception.valid_key? key, @config
                   @config[key] = val
                end
             end
@@ -54,7 +54,18 @@ module Agave
        @config
       end
 
-  end # MODULE: Adapter
+
+      class Exception
+
+         def self.valid_key?(key, config)
+             return false if config.key? key
+             raise Error::DriverKey unless config.key? key
+             exit
+         end
+
+      end #CLASS: Adapter::Exception
+  end #MODULE: Adapter
+
 
   class AdapterConnection
      include Adapter
@@ -66,11 +77,13 @@ module Agave
            block.call(Agave::Adapter)
            conn = Agave::Connection.new Adapter.config
            Adapter.clear
+           conn
         end
 
      end #CLASS : self
 
-  end
+  end #CLASS : AdapterConnection
+
 
    class SQLite < AdapterConnection; end #CLASS : SQLite
 
