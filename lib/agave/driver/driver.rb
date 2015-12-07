@@ -78,10 +78,9 @@ module Agave
          end
 
          def self.required_keys?(config, required)
-            check = lambda do |key|
-               raise Error::RequiredDriverKey if config[key] == nil
+            required.each do |k|
+              raise Error::RequiredDriverKey if config[k] == nil
             end
-            required.each {|k| check.call k }
          end
 
       end #CLASS: Adapter::Exception
