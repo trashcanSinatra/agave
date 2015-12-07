@@ -21,7 +21,9 @@ module Agave
                   @config[key] = val
                end
             end
-         rescue Agave::Error::Standard => e
+            # cls = self.get_class
+            # Adapter::Exception.required_keys?(@config, cls.required)
+         rescue Agave::Error::InvalidDriverKey => e
             puts e.message key, @config
          end
       end # METHOD: option
@@ -42,6 +44,18 @@ module Agave
          end
       end
 
+      def self.get_class()
+         case @config[:driver]
+         when 'sqlite'
+            return SQLite
+         when 'mysql'
+            return MySQL
+         when 'pgsql'
+            return PostgreSQL
+         else
+            return false
+         end
+      end
 
       def self.clear
          @config.map do |k,v|
@@ -59,8 +73,15 @@ module Agave
 
          def self.valid_key?(key, config)
              return false if config.key? key
-             raise Error::DriverKey unless config.key? key
+             raise Error::InvalidDriverKey unless config.key? key
              exit
+         end
+
+         def self.required_keys?(config, required)
+            check = lambda do |key|
+               raise Error::RequiredDriverKey if config[key] == nil
+            end
+            required.each {|k| check.call k }
          end
 
       end #CLASS: Adapter::Exception
@@ -73,22 +94,35 @@ module Agave
      class << self
 
         def connect(&block)
-           Adapter.set_driver(self.to_s)
-           block.call(Agave::Adapter)
-           conn = Agave::Connection.new Adapter.config
-           Adapter.clear
-           conn
-        end
+           begin
+              Adapter.set_driver(self.to_s)
+              block.call(Agave::Adapter)
+              Adapter::Exception.required_keys? Adapter.config, @required
+              conn = Agave::Connection.new Adapter.config
+              Adapter.clear
+              conn
+           rescue Agave::Error::RequiredDriverKey => e
+              puts e.message self.to_s, @required
+           end
+         end
+
+        attr_reader :required
 
      end #CLASS : self
 
   end #CLASS : AdapterConnection
 
 
-   class SQLite < AdapterConnection; end #CLASS : SQLite
+   class SQLite < AdapterConnection
+      @required = [:database]
+   end #CLASS : SQLite
 
-   class MySQL < AdapterConnection; end #CLASS: MySQL
+   class MySQL < AdapterConnection
+      @required = [:host, :database, :username, :password]
+   end #CLASS: MySQL
 
-   class PostgreSQL < AdapterConnection; end #CLASS: PostreSQL
+   class PostgreSQL < AdapterConnection
+      @required = [:host, :database, :username, :password]
+   end #CLASS: PostreSQL
 
 end # MODULE:Agave
