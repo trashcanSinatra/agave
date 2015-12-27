@@ -1,6 +1,6 @@
 module Agave
 
-   def self.Table(name, keyword, id=nil, &block)
+   def self.Table(name, keyword, id=nil, *args, &block)
       case keyword
          when :select
             puts Agave::Query.builder.conn
@@ -13,7 +13,13 @@ module Agave
             puts "SELECT * FROM #{keyword}"
          when :find
             puts Agave::Query.builder.conn
-            puts "SELECT * FROM #{name} where id = #{id}"
+            stmt = "SELECT * FROM #{name} where "
+            if args and args.size == 1
+               stmt << "#{args[0]} = #{id}"
+            else
+               stmt << "id = #{id}"
+            end
+            puts stmt
       end
    end
 
@@ -21,7 +27,17 @@ module Agave
       include Agave
       attr_accessor :conn
 
-      def initialize()
+
+      def select()
+      end
+
+      def insert()
+      end
+
+      def delete()
+      end
+
+      def find()
       end
 
       class << self
