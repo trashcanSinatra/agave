@@ -1,18 +1,24 @@
 module Agave
 
    def self.Table(name, keyword, id=nil, *args, &block)
+      # Capture builder object.
+      qryObject = Agave::Query.builder
+      qryObject.table = name
+
       case keyword
          when :select
-            puts Agave::Query.builder.conn
-            puts "SELECT * FROM #{keyword}"
+            if block
+               then yield qryObject
+            else
+              qryObject.selects = "*"
+           end
+           qryObject.select
          when :insert
-            puts Agave::Query.builder.conn
-            puts "SELECT * FROM #{keyword}"
+            puts qryObject.conn
          when :delete
-            puts Agave::Query.builder.conn
-            puts "SELECT * FROM #{keyword}"
+            puts qryObject.conn
          when :find
-            puts Agave::Query.builder.conn
+            puts qryObject.conn
             stmt = "SELECT * FROM #{name} where "
             if args and args.size == 1
                stmt << "#{args[0]} = #{id}"
@@ -25,10 +31,13 @@ module Agave
 
    class Query
       include Agave
-      attr_accessor :conn
+      attr_accessor :conn, :table, :selects
 
 
       def select()
+         if selects
+            puts "SELECT #{@selects} FROM #{@table}"
+         end
       end
 
       def insert()
@@ -40,13 +49,19 @@ module Agave
       def find()
       end
 
+      def columns(*columns)
+         if columns
+            @selects = columns.join(", ").chomp
+         end
+      end
+
       class << self
 
          attr_accessor :builder
 
          def make(connection)
             @builder = Agave::Query.new
-            @builder.conn = connection.clone
+            @builder.conn = connection
          end
 
       end
