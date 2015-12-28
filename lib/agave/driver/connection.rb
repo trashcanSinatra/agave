@@ -9,13 +9,14 @@ module Agave
          when 'sqlite'
             puts @database
             conn = SQLite3::Database.open "#{@database}"
-            Agave::Query.make config
+            Agave::Query.make conn
          when 'mysql'
             conn = Mysql2::Client.new(:host => @host,
                                       :database => @database,
                                       :username => @username,
-                                      :password => @password)
-            Agave::Query.make config
+                                      :password => @password
+                                      )
+            Agave::Query.make conn
          when 'pgsql'
             Agave::Query.make config
          end
