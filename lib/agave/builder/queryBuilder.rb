@@ -1,6 +1,6 @@
 module Agave
 
-   def self.Table(name, keyword, id=nil, *args, &block)
+   def self.Table(name, keyword, id=false, &block)
       # Capture builder object.
       qryObject = Agave::Query.builder
       qryObject.table = name
@@ -11,33 +11,37 @@ module Agave
                then yield qryObject
             else
               qryObject.selects = "*"
+              qryObject.where_params(:id, id) if id
            end
            qryObject.select
          when :insert
             puts qryObject.conn
          when :delete
             puts qryObject.conn
-         when :find
-            puts qryObject.conn
-            stmt = "SELECT * FROM #{name} where "
-            if args and args.size == 1
-               stmt << "#{args[0]} = #{id}"
-            else
-               stmt << "id = #{id}"
-            end
-            puts stmt
       end
    end
 
    class Query
       include Agave
-      attr_accessor :conn, :table, :selects
+      attr_accessor :conn, :table, :selects, :wheres
 
+
+      def get_where(key)
+         @wheres[key]
+      end
+
+      def where_params(key, val)
+         @wheres[key] = val
+      end
 
       def select()
-         if selects
-            puts "SELECT #{@selects} FROM #{@table}"
+         if @selects
+            qry = "SELECT #{@selects} FROM #{@table}"
          end
+         if @wheres[:id]
+            qry << " WHERE id = #{get_where(:id)}"
+         end
+         puts qry
       end
 
       def insert()
@@ -62,6 +66,7 @@ module Agave
          def make(connection)
             @builder = Agave::Query.new
             @builder.conn = connection
+            @builder.wheres = {}
          end
 
       end
