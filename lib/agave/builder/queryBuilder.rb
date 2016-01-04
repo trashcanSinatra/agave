@@ -1,8 +1,14 @@
 module Agave
 
+   @liveConnection
+
+   def self.connection(conn)
+      @liveConnection ||= conn
+   end
+
    def self.Table(name, keyword, id=false, &block)
       # Capture builder object.
-      qryObject = Agave::Query.builder
+      qryObject = Agave::Query.make @liveConnection
       qryObject.table = name
 
       case keyword
@@ -13,6 +19,7 @@ module Agave
               qryObject.selects = "*"
               qryObject.where_params(:id, id) if id
            end
+           puts qryObject
            qryObject.select
          when :insert
             puts qryObject.conn
@@ -35,9 +42,7 @@ module Agave
       end
 
       def select()
-         if @selects
-            qry = "SELECT #{@selects} FROM #{@table}"
-         end
+         qry = "SELECT #{@selects} FROM #{@table}"
          if @wheres[:id]
             qry << " WHERE id = #{get_where(:id)}"
          end
@@ -64,9 +69,12 @@ module Agave
          attr_accessor :builder
 
          def make(connection)
+            Agave::connection(connection)
             @builder = Agave::Query.new
             @builder.conn = connection
+            @builder.selects = "*"
             @builder.wheres = {}
+            return @builder
          end
 
       end
