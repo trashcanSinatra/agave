@@ -16,7 +16,6 @@ module Agave
             if block
                then yield qryObject
             else
-              qryObject.selects = "*"
               qryObject.where_params(:id, id) if id
            end
            puts qryObject
